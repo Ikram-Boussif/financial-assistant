@@ -1,6 +1,29 @@
 spring:
   application:
     name: financial-assistant
+  config:
+    import: optional:file:.env[.properties]
+  web:
+    # Language used when the request has no Accept-Language header.
+    locale: en
+  messages:
+    # Unsupported language (e.g. de) -> messages.properties (English), not the server's OS language.
+    fallback-to-system-locale: false
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY:}
+        chat:
+          options:
+            model: gemini-3.5-flash-lite
+            temperature: 0.4
+    retry:
+      # By default Spring AI makes 10 attempts (2s, 10s, 50s...): far too long for a web API.
+      max-attempts: 2
+      backoff:
+        initial-interval: 1s
+        multiplier: 2
+        max-interval: 3s
   datasource:
     url: jdbc:h2:mem:financialdb
     driver-class-name: org.h2.Driver
@@ -20,3 +43,8 @@ spring:
 
 server:
   port: 8080
+
+app:
+  ai:
+    # Max duration of a single Gemini call (per attempt).
+    timeout: 20s
